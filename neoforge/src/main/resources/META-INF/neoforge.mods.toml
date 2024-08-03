@@ -24,7 +24,7 @@ itemIcon="minecraft:painting" #catalogue icon
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "REQUIRED"
-versionRange = "${forge_version_range}"
+versionRange = "${neo_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
