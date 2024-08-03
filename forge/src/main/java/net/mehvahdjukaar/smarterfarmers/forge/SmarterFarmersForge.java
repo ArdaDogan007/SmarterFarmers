@@ -2,11 +2,11 @@ package net.mehvahdjukaar.smarterfarmers.forge;
 
 import net.mehvahdjukaar.smarterfarmers.SmarterFarmers;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityMobGriefingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 
 /**
  * Author: MehVahdJukaar
@@ -16,6 +16,7 @@ public class SmarterFarmersForge {
 
     public SmarterFarmersForge(IEventBus bus) {
         SmarterFarmers.commonInit();
+        NeoForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent

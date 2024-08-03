@@ -38,7 +38,7 @@ subprojects {
 
     if (env.MODRINTH_TOKEN) {
         modrinth {
-            projectId = "fast-paintings"
+            projectId = "smarterfarmers"
             uploadFile = tasks.remapJar
             gameVersions = [rootProject.minecraft_version]
             if (modLoader == "forge") {
