@@ -2,6 +2,7 @@ package net.mehvahdjukaar.smarterfarmers;
 
 import net.mehvahdjukaar.moonlight.api.block.IBeeGrowable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -16,8 +17,6 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public class FarmTaskLogic {
 
-
-    //TODO: make them hold seeds
     public static ItemStack getHoe(Villager pEntity) {
         return switch (pEntity.getVillagerData().getLevel()) {
             case 1 -> Items.WOODEN_HOE.getDefaultInstance();
@@ -29,26 +28,31 @@ public class FarmTaskLogic {
         };
     }
 
-    public static boolean isCropMature(BlockState state,  BlockPos pos,Level level) {
+    public static boolean isCropMature(BlockState state, BlockPos pos, Level level) {
         Block b = state.getBlock();
         if (state.isAir()) return false;
-        if(b instanceof IBeeGrowable bg){
+        if (b instanceof IBeeGrowable bg) {
             return bg.isPlantFullyGrown(state, pos, level);
         }
-        return ((b instanceof CropBlock crop && crop.isMaxAge(state)) ||
-                b instanceof SweetBerryBushBlock && state.getValue(SweetBerryBushBlock.AGE) == 2 ||
-                hardcodedCheckMaxAge(state, b)); //if previous didnt catch it (some mods dont extend crop block)
+        if (b instanceof CropBlock crop) {
+            return crop.isMaxAge(state);
+        }
+        if (b instanceof CropBlock crop) {
+            crop.isMaxAge(state);
+        }
+        return b instanceof SweetBerryBushBlock && state.getValue(SweetBerryBushBlock.AGE) == 2 ||
+                hardcodedCheckMaxAge(state, b); //if previous didnt catch it (some mods dont extend crop block)
     }
 
     private static boolean hardcodedCheckMaxAge(BlockState state, Block b) {
-        return SFPlatformStuff.isPlantable(state) && (
-                checkAge(state, BlockStateProperties.AGE_1, 1) ||
+        return state.getBlock().asItem().builtInRegistryHolder().is(ItemTags.VILLAGER_PLANTABLE_SEEDS) &&
+                (checkAge(state, BlockStateProperties.AGE_1, 1) ||
                         checkAge(state, BlockStateProperties.AGE_2, 2) ||
                         checkAge(state, BlockStateProperties.AGE_3, 3) ||
                         checkAge(state, BlockStateProperties.AGE_4, 4) ||
                         checkAge(state, BlockStateProperties.AGE_5, 5) ||
                         checkAge(state, BlockStateProperties.AGE_7, 7)
-        );
+                );
     }
 
     private static boolean checkAge(BlockState state, IntegerProperty property, int max) {

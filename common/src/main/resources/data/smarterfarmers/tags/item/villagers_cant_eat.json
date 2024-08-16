@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {"id":"#c:foods/meat","required":false},
+    {"id":"#c:foods/raw_meat","required":false},
+    {"id":"#c:foods/raw_fish","required":false},
+    {"id":"#c:foods/cooked_meat","required":false},
+    {"id":"#c:foods/cooked_fish","required":false},
+    {"id":"#c:foods/soup","required":false},
+    {"id":"#c:foods/food_poisoning","required":false},
+    {"id":"#c:foods/golden","required":false}
+  ]
+}

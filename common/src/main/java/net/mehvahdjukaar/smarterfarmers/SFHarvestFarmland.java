@@ -22,9 +22,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -111,7 +112,7 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
 
     // Find best seed to plant at position
-    protected ItemStack getSeedToPlantAt(BlockPos targetPos, ServerLevel level, Villager entity) {
+    protected ItemStack getSeedToPlantAt(BlockPos targetPos, ServerLevel level, Villager villager) {
         // see what's around first
         FrequencyOrderedCollection<Item> blockAsItemAround = new FrequencyOrderedCollection<>();
         BlockPos.MutableBlockPos mutableBlockPos = targetPos.mutable();
@@ -128,7 +129,7 @@ public class SFHarvestFarmland extends HarvestFarmland {
             }
         }
         // see what farmer inventory has
-        SimpleContainer inventory = entity.getInventory();
+        SimpleContainer inventory = villager.getInventory();
         Set<Item> availableSeeds = new HashSet<>();
         Map<Item, ItemStack> villagerSeedsInInventory = new HashMap<>();
         for (int i = 0; i < inventory.getContainerSize(); ++i) {
@@ -136,8 +137,7 @@ public class SFHarvestFarmland extends HarvestFarmland {
             Item it = itemStack.getItem();
             if (itemStack.isEmpty()) continue;
             //check if its a crop
-            Block isCrop = SFPlatformStuff.getCropFromSeed(level, targetPos, it);
-            if (isCrop != null) {
+            if (SFPlatformStuff.isValidSeed(itemStack, villager)) {
                 availableSeeds.add(it);
                 villagerSeedsInInventory.put(it, itemStack);
             }
@@ -262,30 +262,46 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
         //check if toHarvestBlock is empty to replant
         if (targetState.isAir() && FarmTaskLogic.isValidFarmland(farmlandBlock.getBlock())) {
-            // first try to replant. 
-            ItemStack itemToPlant = findSameItem(villager.getInventory(), toReplace);
-
-            // if we cant replant, or we are planting a new, recompute seed to plant anyways
-            // seedToHold is just visual. Most time it should match whats actually planted
-            if (itemToPlant == null) {
-                itemToPlant = getSeedToPlantAt(this.aboveFarmlandPos, level, villager);
-            }
-
-            if (itemToPlant != null) {
-
-                level.setBlock(aboveFarmlandPos, SFPlatformStuff.getPlant(level, aboveFarmlandPos, itemToPlant), 3);
-
-                level.playSound(null, this.aboveFarmlandPos.getX(), this.aboveFarmlandPos.getY(), this.aboveFarmlandPos.getZ(), SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
-                itemToPlant.shrink(1);
-
-            }
-
+            replant(level, villager, toReplace);
         }
 
         // if we reach here, wether we failed or not, we recalculate a new target
-
         // just ends the task
         this.aboveFarmlandPos = null;
+    }
+
+    private void replant(ServerLevel level, Villager villager, Item toReplace) {
+        // first try to replant.
+        ItemStack itemToPlant = findSameItem(villager.getInventory(), toReplace);
+
+        // if we cant replant, or we are planting a new, recompute seed to plant anyways
+        // seedToHold is just visual. Most time it should match whats actually planted
+        if (itemToPlant == null) {
+            itemToPlant = getSeedToPlantAt(this.aboveFarmlandPos, level, villager);
+        }
+
+        if (itemToPlant != null) {
+
+            boolean success = false;
+            if (SFPlatformStuff.trySpecialPlant(level, this.aboveFarmlandPos, itemToPlant, villager)) {
+                success = true;
+            } else if (itemToPlant.getItem() instanceof BlockItem blockItem) {
+                BlockState toPlant = blockItem.getBlock().defaultBlockState();
+                level.setBlock(this.aboveFarmlandPos, toPlant, 3);
+                success = true;
+            }
+
+            if (success) {
+                BlockState placed = level.getBlockState(this.aboveFarmlandPos);
+                level.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, placed));
+
+                level.playSound(null, this.aboveFarmlandPos.getX(), this.aboveFarmlandPos.getY(), this.aboveFarmlandPos.getZ(), SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
+                itemToPlant.shrink(1);
+            }
+            else{
+                int aa = 1;
+            }
+        }
     }
 
     @Nullable

@@ -6,7 +6,6 @@ import net.mehvahdjukaar.smarterfarmers.SmarterFarmers;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ai.behavior.VillagerGoalPackages;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerData;
@@ -15,7 +14,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -30,7 +32,8 @@ public abstract class VillagerMixin extends AbstractVillager {
     @Shadow
     public static Map<Item, Integer> FOOD_POINTS;
 
-    @Shadow public abstract VillagerData getVillagerData();
+    @Shadow
+    public abstract VillagerData getVillagerData();
 
     protected VillagerMixin(EntityType<? extends AbstractVillager> entityType, Level level) {
         super(entityType, level);
@@ -44,7 +47,7 @@ public abstract class VillagerMixin extends AbstractVillager {
             cir.cancel();
         }
         //prevent non farmers from stealing seeds
-        else if (SFPlatformStuff.isValidSeed(i)) {
+        else if (SFPlatformStuff.isValidSeed(stack, (Villager) (Object) this)) {
             boolean grab = smarterfarmers$isFarmer() && this.getInventory().canAddItem(stack);
             cir.setReturnValue(grab);
             cir.cancel();

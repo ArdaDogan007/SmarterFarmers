@@ -3,11 +3,12 @@ package net.mehvahdjukaar.smarterfarmers;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
-import net.mehvahdjukaar.moonlight.api.events.forge.VillagerBrainEvent;
+import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.smarterfarmers.mixins.VillagerAccessor;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -19,7 +20,9 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
@@ -39,22 +42,22 @@ public class SmarterFarmers {
     public static final Logger LOGGER = LogManager.getLogger();
 
     public static ResourceLocation res(String name) {
-        return new ResourceLocation(MOD_ID, name);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
     }
 
     public static final boolean QUARK = PlatHelper.isModLoaded("quark");
 
-    public static final TagKey<Block> SPECIAL_HARVESTABLE = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "harvestable_plant"));
-    public static final TagKey<Block> NO_REPLANT = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "harvestable_plant_no_replant"));
-    public static final TagKey<Block> VALID_FARMLAND = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "farmer_plantable_on"));
-    public static final TagKey<Item> MEAT = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "food/meat"));
+    public static final TagKey<Block> SPECIAL_HARVESTABLE = TagKey.create(Registries.BLOCK, res("harvestable_plant"));
+    public static final TagKey<Block> NO_REPLANT = TagKey.create(Registries.BLOCK, res("harvestable_plant_no_replant"));
+    public static final TagKey<Block> VALID_FARMLAND = TagKey.create(Registries.BLOCK, res("farmer_plantable_on"));
+    public static final TagKey<Item> EAT_BLACKLIST = TagKey.create(Registries.ITEM, res("villagers_cant_eat"));
 
     public static final Supplier<Boolean> PICKUP_FOOD;
     public static final Supplier<Boolean> EAT_FOOD;
     public static final Supplier<Boolean> DEBUG_RENDERERS;
     public static final Supplier<Integer> TIME_TO_HARVEST;
 
-    static{
+    static {
         ConfigBuilder builder = ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
 
         builder.push("general");
@@ -64,13 +67,13 @@ public class SmarterFarmers {
                 .define("eat_food", true);
         TIME_TO_HARVEST = builder.comment("Time for a farmer to harvest a crop once it reached its destination")
                 .define("time_to_harvest", 40, 1, 1000);
-        DEBUG_RENDERERS = PlatHelper.isDev() ? ()->true :
+        DEBUG_RENDERERS = PlatHelper.isDev() ? () -> true :
                 builder.comment("If true, will render debug info for farmers. Only works in single player")
-                .define("debug_renderer", false);
+                        .define("debug_renderer", false);
 
         builder.pop();
 
-        builder.buildAndRegister();
+        builder.build();
     }
 
     public static void commonInit() {
@@ -79,20 +82,19 @@ public class SmarterFarmers {
     }
 
     public static void setup() {
-        //TODO: add villager worksite modded blocks (farmland)
         //TODO: use quark recipe crawl to convert crop->seed or crop->food
         try {
             Map<Item, Integer> newMap = new HashMap<>(Villager.FOOD_POINTS);
 
             for (Item i : BuiltInRegistries.ITEM) {
-                if (i.isEdible() && i.getRarity(new ItemStack(i)) == Rarity.COMMON && !
-                        i.builtInRegistryHolder().is(MEAT)
-                        //ignore container items
-                        && !(i instanceof BowlFoodItem) && !(i instanceof HoneyBottleItem)) {
-                    FoodProperties foodProperties = i.getFoodProperties();
-                    if (foodProperties != null) {
-                        newMap.put(i, (int) Math.max(1, foodProperties.getNutrition() * 2 / 3f));
-                    }
+                FoodProperties foodProperties = i.components().get(DataComponents.FOOD);
+                if (foodProperties != null && i.components().getOrDefault(DataComponents.RARITY, Rarity.COMMON) != Rarity.COMMON
+                        // villagers are vegetarian!
+                        && !i.builtInRegistryHolder().is(EAT_BLACKLIST)
+                        // ignore container items
+                        && !i.hasCraftingRemainingItem()
+                        && i.getDefaultMaxStackSize() > 1) {
+                    newMap.put(i, (int) Math.max(1, foodProperties.nutrition() * 2 / 3f));
                 }
             }
             VillagerAccessor.setFoodPoints(newMap);
@@ -102,10 +104,11 @@ public class SmarterFarmers {
     }
 
 
+    @EventCalled
     public static void onVillagerBrainInitialize(IVillagerBrainEvent event) {
         //babies do not eat
-        // this also mean they will need a reload after they grown up...
-        if (!event.getVillager().isBaby() && EAT_FOOD.get()) {
+        // this also mean they will need a reload after they have grown up...
+        if (EAT_FOOD.get()) {
             event.addTaskToActivity(Activity.MEET, Pair.of(7, new EatFoodGoal(100, 140)));
         }
     }

@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.smarterfarmers;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
@@ -35,7 +34,8 @@ public class EatFoodGoal extends Behavior<Villager> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel pLevel, Villager pOwner) {
-        if (cooldown > 0){
+        if (pOwner.isBaby()) return false;
+        if (cooldown > 0) {
             cooldown--;
             return false;
         }
@@ -109,9 +109,9 @@ public class EatFoodGoal extends Behavior<Villager> {
             if (food != null) {
                 for (int i = 0; i < pEntity.getInventory().getContainerSize(); ++i) {
                     ItemStack s = pEntity.getInventory().getItem(i);
-                    if(s.getItem() == item){
+                    if (s.getItem() == item) {
                         s.split(1);
-                        pEntity.heal(Math.max(1,food));
+                        pEntity.heal(Math.max(1, food));
 
                         item.finishUsingItem(stack, pLevel, pEntity);
                         this.cooldown = 20 * (4 + pLevel.random.nextInt(14)) + pLevel.random.nextInt(20);

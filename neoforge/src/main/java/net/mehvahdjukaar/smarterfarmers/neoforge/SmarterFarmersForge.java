@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.smarterfarmers.forge;
+package net.mehvahdjukaar.smarterfarmers.neoforge;
 
 import net.mehvahdjukaar.smarterfarmers.SmarterFarmers;
 import net.minecraft.world.entity.npc.Villager;
@@ -21,8 +21,8 @@ public class SmarterFarmersForge {
 
     @SubscribeEvent
     public void mobGriefing(EntityMobGriefingEvent event) {
-        if(event.getEntity() instanceof Villager && SmarterFarmers.PICKUP_FOOD.get()){
-            event.setResult(EntityMobGriefingEvent.Result.ALLOW);
+        if (event.getEntity() instanceof Villager && SmarterFarmers.PICKUP_FOOD.get()) {
+            event.setCanGrief(true);
         }
     }
 }
