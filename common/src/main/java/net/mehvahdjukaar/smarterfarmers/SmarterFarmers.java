@@ -3,9 +3,11 @@ package net.mehvahdjukaar.smarterfarmers;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.mehvahdjukaar.moonlight.api.events.forge.VillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.smarterfarmers.mixins.VillagerAccessor;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -49,6 +51,8 @@ public class SmarterFarmers {
 
     public static final Supplier<Boolean> PICKUP_FOOD;
     public static final Supplier<Boolean> EAT_FOOD;
+    public static final Supplier<Boolean> DEBUG_RENDERERS;
+    public static final Supplier<Integer> TIME_TO_HARVEST;
 
     static{
         ConfigBuilder builder = ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
@@ -58,6 +62,11 @@ public class SmarterFarmers {
                 .define("pickup_food_override", true);
         EAT_FOOD = builder.comment("If true, villagers will eat food items they pick up. Eating food will heal them")
                 .define("eat_food", true);
+        TIME_TO_HARVEST = builder.comment("Time for a farmer to harvest a crop once it reached its destination")
+                .define("time_to_harvest", 40, 1, 1000);
+        DEBUG_RENDERERS = PlatHelper.isDev() ? ()->true :
+                builder.comment("If true, will render debug info for farmers. Only works in single player")
+                .define("debug_renderer", false);
 
         builder.pop();
 
@@ -86,7 +95,7 @@ public class SmarterFarmers {
                     }
                 }
             }
-            Villager.FOOD_POINTS = newMap;
+            VillagerAccessor.setFoodPoints(newMap);
         } catch (Exception e) {
             LOGGER.warn("Failed to add custom foods to villagers");
         }

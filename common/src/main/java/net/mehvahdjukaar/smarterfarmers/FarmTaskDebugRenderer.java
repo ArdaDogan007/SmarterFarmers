@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.smarterfarmers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.DebugRenderer;
@@ -25,37 +24,31 @@ public class FarmTaskDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
     }
 
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, double camX, double camY, double camZ) {
-        this.doRender(poseStack, bufferSource);
-        if (!this.mc().player.isSpectator()) {
-            //this.updateLastLookedAtUuid();
+        if (!SmarterFarmers.DEBUG_RENDERERS.get()) return;
+        this.villagerFarmTasks.entrySet().forEach((entry) -> {
+            if (this.isPlayerCloseEnoughToMob(entry.getKey())) {
+                this.renderInfo(poseStack, bufferSource, entry.getValue(), entry.getKey());
+            }
 
-        }
-
-    }
-
-    private Camera getCamera() {
-        return Minecraft.getInstance().gameRenderer.getMainCamera();
+        });
     }
 
     private Minecraft mc() {
         return Minecraft.getInstance();
     }
 
-    private void doRender(PoseStack poseStack, MultiBufferSource multiBufferSource) {
-        this.villagerFarmTasks.entrySet().forEach((entry) -> {
-            if (this.isPlayerCloseEnoughToMob(entry.getKey())) {
-                this.renderInfo(poseStack, multiBufferSource, entry.getValue(), entry.getKey());
-            }
-
-        });
-
-    }
-
     private void renderInfo(PoseStack poseStack, MultiBufferSource multiBufferSource, SFHarvestFarmland task, Villager villager) {
         boolean selected = true;
         int i = 0;
         renderTextOverMob(poseStack, multiBufferSource, villager.position(), i++,
-                "Status", task.active ? 0x009900 : 0x990000, 0.03F);
+                "Activities: " + villager.getBrain().getActiveActivities(), 0xff9900, 0.03F);
+        renderTextOverMob(poseStack, multiBufferSource, villager.position(), i++,
+                "Active " + task.active, task.active ? 0x009900 : 0x990000, 0.03F);
+        renderTextOverMob(poseStack, multiBufferSource, villager.position(), i++,
+                "Last attempted start: " + task.lastTriedToStart, -1, 0.03F);
+        renderTextOverMob(poseStack, multiBufferSource, villager.position(), i++,
+                "Wants to plant: " + task.seedToHold, 0x00ff22, 0.03F);
+
 
         renderTextOverMob(poseStack, multiBufferSource, villager.position(), i++,
                 "Plant Timer: " + (task.plantTimer),
@@ -67,12 +60,14 @@ public class FarmTaskDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
                         ii.toString(), 0x99aa00, 0.03F);
             }
         }
+        renderTextOverMob(poseStack, multiBufferSource, villager.position(), i++,
+                "Inventory:", 0xaabb00, 0.03F);
 
         if (task.aboveFarmlandPos != null)
             highlightPos(poseStack, multiBufferSource, task.aboveFarmlandPos,
                     1.0F, 1.0F, 1.0F, -0.2f);
 
-        if(task.farmlandAround != null)
+        if (task.farmlandAround == null) return;
         for (var v : List.copyOf(task.farmlandAround)) {
             BlockPos p = v.getFirst().below();
             switch (v.getSecond()) {
@@ -111,8 +106,9 @@ public class FarmTaskDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
         return villager.closerThan(player, 30.0);
     }
 
-
     public void trackTask(Villager entity, SFHarvestFarmland sfHarvestFarmland) {
-        this.villagerFarmTasks.put(entity, sfHarvestFarmland);
+        if (SmarterFarmers.DEBUG_RENDERERS.get()) {
+            this.villagerFarmTasks.put(entity, sfHarvestFarmland);
+        }
     }
 }

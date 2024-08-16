@@ -10,9 +10,8 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(VillagerGoalPackages.class)
 public class ReplaceTaskMixin {
 
-    @ModifyExpressionValue(method = "getWorkPackage", at= @At(value = "NEW", target = "()Lnet/minecraft/world/entity/ai/behavior/HarvestFarmland;"))
-    private static HarvestFarmland aa(HarvestFarmland original){
-
+    @ModifyExpressionValue(method = "getWorkPackage", at = @At(value = "NEW", target = "()Lnet/minecraft/world/entity/ai/behavior/HarvestFarmland;"))
+    private static HarvestFarmland smarterfarmers$replaceHarvestGoal(HarvestFarmland original) {
         return new SFHarvestFarmland();
     }
 }

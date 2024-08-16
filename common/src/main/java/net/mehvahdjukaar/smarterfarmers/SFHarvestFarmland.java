@@ -2,6 +2,8 @@ package net.mehvahdjukaar.smarterfarmers;
 
 import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Pair;
+import net.mehvahdjukaar.moonlight.api.misc.FrequencyOrderedCollection;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.smarterfarmers.integration.QuarkIntegration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -24,14 +26,13 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.*;
 
 public class SFHarvestFarmland extends HarvestFarmland {
-    private static final int TIME_TO_PLANT = 40;
 
     public int plantTimer;
-    public int plantsPlanted;
 
     // chosen target
     public BlockPos aboveFarmlandPos = null;
@@ -39,9 +40,12 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
     // debug
 
+    @VisibleForTesting
     public boolean active = false;
-    @Deprecated
+    @VisibleForTesting
     public List<Pair<BlockPos, Action>> farmlandAround;
+    @VisibleForTesting
+    public long lastTriedToStart;
 
 
     public SFHarvestFarmland() {
@@ -51,8 +55,7 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, Villager owner) {
-        FarmTaskDebugRenderer.INSTANCE.trackTask(owner, this);
-
+        this.lastTriedToStart = level.getGameTime();
         if (!level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
             return false;
         } else if (owner.getVillagerData().getProfession() != VillagerProfession.FARMER) {
@@ -62,7 +65,7 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
         if (farmlandAround.isEmpty()) return false;
 
-        var chosen = farmlandAround.remove(level.getRandom()
+        var chosen = farmlandAround.get(level.getRandom()
                 .nextInt(farmlandAround.size()));
 
 
@@ -77,8 +80,10 @@ public class SFHarvestFarmland extends HarvestFarmland {
             } else {
                 // if not we try getting a non plant action
                 farmlandAround.removeIf(e -> e.getSecond() == Action.PLANT);
-                if (farmlandAround.isEmpty()) return false;
-                chosen = farmlandAround.remove(level.getRandom()
+                if (farmlandAround.isEmpty()) {
+                    return false;
+                }
+                chosen = farmlandAround.get(level.getRandom()
                         .nextInt(farmlandAround.size()));
                 this.aboveFarmlandPos = chosen.getFirst();
             }
@@ -138,30 +143,32 @@ public class SFHarvestFarmland extends HarvestFarmland {
             }
         }
 
-        // filter
-        blockAsItemAround.retainAll(availableSeeds);
+        if (availableSeeds.isEmpty()) return ItemStack.EMPTY;
 
-        // choose
-        return blockAsItemAround.getFirst()
-                .map(villagerSeedsInInventory::get)
-                .orElse(ItemStack.EMPTY);
+        // filter
+        for (Item item : blockAsItemAround) {
+            if (availableSeeds.contains(item)) {
+                return villagerSeedsInInventory.get(item);
+            }
+        }
+        return villagerSeedsInInventory.get(availableSeeds.iterator().next());
     }
 
     @Override
     protected void start(ServerLevel level, Villager entity, long gameTime) {
         this.active = true;
-        this.plantTimer = 40;
+        this.plantTimer = SmarterFarmers.TIME_TO_HARVEST.get();
 
         Preconditions.checkNotNull(this.aboveFarmlandPos);
-
-        //if (gameTime > this.nextOkStartTime) {
 
         entity.setItemSlot(EquipmentSlot.MAINHAND, seedToHold != null ? seedToHold.copy() : FarmTaskLogic.getHoe(entity));
 
         entity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, (new BlockPosTracker(this.aboveFarmlandPos)));
         entity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, (new WalkTarget(new BlockPosTracker(this.aboveFarmlandPos), 0.5F, 1)));
-        // }
 
+        if (PlatHelper.getPhysicalSide() == PlatHelper.Side.CLIENT) {
+            FarmTaskDebugRenderer.INSTANCE.trackTask(entity, this);
+        }
     }
 
     @Override
@@ -171,7 +178,6 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
         entity.getBrain().eraseMemory(MemoryModuleType.LOOK_TARGET);
         entity.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
-        //this.nextOkStartTime = gameTime + 40L;
         this.aboveFarmlandPos = null;
         this.farmlandAround.clear();
     }
@@ -180,12 +186,12 @@ public class SFHarvestFarmland extends HarvestFarmland {
      * If this position contains valid farmland blocks
      */
     @Nullable
-    protected Action getActionForPos(BlockPos pPos, ServerLevel level) {
-        BlockState cropState = level.getBlockState(pPos);
-        BlockState farmState = level.getBlockState(pPos.below());
-        boolean validFarmland = FarmTaskLogic.isValidFarmland(farmState);
+    protected Action getActionForPos(BlockPos pos, ServerLevel level) {
+        BlockState cropState = level.getBlockState(pos);
+        BlockState farmState = level.getBlockState(pos.below());
+        boolean validFarmland = FarmTaskLogic.isValidFarmland(farmState.getBlock());
         if (validFarmland) {
-            if (FarmTaskLogic.isCropMature(cropState)) {
+            if (FarmTaskLogic.isCropMature(cropState, pos, level)) {
                 return Action.HARVEST_AND_REPLANT;
             }
             if (cropState.isAir()) {
@@ -199,13 +205,14 @@ public class SFHarvestFarmland extends HarvestFarmland {
         return null;
     }
 
+
     @Override
     public void tick(ServerLevel level, Villager villager, long tickCount) {
         // if it's close to target pos
         // greater than 1 because this game navigation is shit and will stop before distance 1
         // move to sync target is so dumb and works in block pos. this means it will stop when entity blockpos is 1 manhattan block away from this pos.
         // max dist from center of a block is thus 1.5
-        if (!this.aboveFarmlandPos.closerToCenterThan(villager.position(), 1.501)) return;
+        if (!this.aboveFarmlandPos.closerToCenterThan(villager.position(), 2)) return;
 
         this.plantTimer--;
 
@@ -235,7 +242,7 @@ public class SFHarvestFarmland extends HarvestFarmland {
                     return;
                 }
                 //break normal crop
-            } else if (FarmTaskLogic.isCropMature(targetState)) {
+            } else if (FarmTaskLogic.isCropMature(targetState, aboveFarmlandPos, level)) {
                 if (SmarterFarmers.QUARK && QuarkIntegration.breakWithAutoReplant(level, this.aboveFarmlandPos, villager)) {
                     this.aboveFarmlandPos = null;
                     //exit as auto replant did job for us
@@ -254,7 +261,7 @@ public class SFHarvestFarmland extends HarvestFarmland {
         targetState = level.getBlockState(this.aboveFarmlandPos);
 
         //check if toHarvestBlock is empty to replant
-        if (targetState.isAir() && FarmTaskLogic.isValidFarmland(farmlandBlock)) {
+        if (targetState.isAir() && FarmTaskLogic.isValidFarmland(farmlandBlock.getBlock())) {
             // first try to replant. 
             ItemStack itemToPlant = findSameItem(villager.getInventory(), toReplace);
 

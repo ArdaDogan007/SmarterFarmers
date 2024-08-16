@@ -29,11 +29,11 @@ public class FarmTaskLogic {
         };
     }
 
-    public static boolean isCropMature(BlockState state, Level level, BlockPos pos) {
+    public static boolean isCropMature(BlockState state,  BlockPos pos,Level level) {
         Block b = state.getBlock();
         if (state.isAir()) return false;
         if(b instanceof IBeeGrowable bg){
-            return bg.isCropFullyGrown(state, level, pos);
+            return bg.isPlantFullyGrown(state, pos, level);
         }
         return ((b instanceof CropBlock crop && crop.isMaxAge(state)) ||
                 b instanceof SweetBerryBushBlock && state.getValue(SweetBerryBushBlock.AGE) == 2 ||
@@ -66,10 +66,6 @@ public class FarmTaskLogic {
 
     public static boolean isValidFarmland(Block block) {
         return block instanceof FarmBlock || block.builtInRegistryHolder().is(SmarterFarmers.VALID_FARMLAND);
-    }
-
-    public static boolean isValidFarmland(BlockState state) {
-        return isValidFarmland(state.getBlock());
     }
 
 }
