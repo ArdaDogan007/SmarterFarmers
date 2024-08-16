@@ -44,17 +44,17 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    archiveClassifier = "dev-shadow"
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
+    archiveClassifier = null
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier = "dev"
 }
 
 sourcesJar {
@@ -101,14 +101,17 @@ dependencies {
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
-    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixin_extras_version}"))
-    implementation(include("io.github.llamalad7:mixinextras-forge:${mixin_extras_version}"))
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.6"))
+    implementation(include("io.github.llamalad7:mixinextras-forge:0.3.6"))
     annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
 
 
     implementation 'org.jetbrains:annotations:22.0.0'
 
     modImplementation("curse.maven:farmers-delight-398521:4679319")
+    modImplementation("curse.maven:haunted-harvest-541753:5212692")
+    modCompileOnly("curse.maven:libertys-villagers-700485:4801184")
 
     modImplementation("net.mehvahdjukaar:moonlight-forge:${project.moonlight_version}")
     modCompileOnly ("curse.maven:jei-238222:3884337")

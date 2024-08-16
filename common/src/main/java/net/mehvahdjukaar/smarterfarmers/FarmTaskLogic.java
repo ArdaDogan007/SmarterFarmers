@@ -1,8 +1,11 @@
 package net.mehvahdjukaar.smarterfarmers;
 
+import net.mehvahdjukaar.moonlight.api.block.IBeeGrowable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
@@ -14,20 +17,24 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 public class FarmTaskLogic {
 
 
+    //TODO: make them hold seeds
     public static ItemStack getHoe(Villager pEntity) {
         return switch (pEntity.getVillagerData().getLevel()) {
-            default -> Items.IRON_HOE.getDefaultInstance();
             case 1 -> Items.WOODEN_HOE.getDefaultInstance();
             case 2 -> Items.STONE_HOE.getDefaultInstance();
             case 4 -> Items.GOLDEN_HOE.getDefaultInstance();
             case 5 -> Items.DIAMOND_HOE.getDefaultInstance();
             case 6 -> Items.NETHERITE_HOE.getDefaultInstance();
+            default -> Items.IRON_HOE.getDefaultInstance();
         };
     }
 
-    public static boolean isCropMature(BlockState state) {
+    public static boolean isCropMature(BlockState state, Level level, BlockPos pos) {
         Block b = state.getBlock();
         if (state.isAir()) return false;
+        if(b instanceof IBeeGrowable bg){
+            return bg.isCropFullyGrown(state, level, pos);
+        }
         return ((b instanceof CropBlock crop && crop.isMaxAge(state)) ||
                 b instanceof SweetBerryBushBlock && state.getValue(SweetBerryBushBlock.AGE) == 2 ||
                 hardcodedCheckMaxAge(state, b)); //if previous didnt catch it (some mods dont extend crop block)
@@ -48,7 +55,8 @@ public class FarmTaskLogic {
         return state.hasProperty(property) && state.getValue(property) == max;
     }
 
-    public static boolean canSpecialBreak(BlockState state) {
+    // plants that can be harvested on any soil
+    public static boolean canAlwaysHarvest(BlockState state) {
         return state.is(SmarterFarmers.SPECIAL_HARVESTABLE) || canBreakNoReplant(state);
     }
 

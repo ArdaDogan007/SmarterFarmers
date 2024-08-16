@@ -3,7 +3,6 @@ package net.mehvahdjukaar.smarterfarmers.mixins;
 
 import net.mehvahdjukaar.smarterfarmers.SFPlatformStuff;
 import net.mehvahdjukaar.smarterfarmers.SmarterFarmers;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
@@ -14,9 +13,7 @@ import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -48,20 +45,20 @@ public abstract class VillagerMixin extends AbstractVillager {
         }
         //prevent non farmers from stealing seeds
         else if (SFPlatformStuff.isValidSeed(i)) {
-            boolean grab = isFarmer() && this.getInventory().canAddItem(stack);
+            boolean grab = smarterfarmers$isFarmer() && this.getInventory().canAddItem(stack);
             cir.setReturnValue(grab);
             cir.cancel();
         }
     }
 
     @Unique
-    private boolean isFarmer() {
+    private boolean smarterfarmers$isFarmer() {
         return this.getVillagerData().getProfession() == VillagerProfession.FARMER;
     }
 
     @Override
     public boolean isInvulnerableTo(@NotNull DamageSource pSource) {
-        if (pSource == this.damageSources().sweetBerryBush() && isFarmer()) return true;
+        if (pSource == this.damageSources().sweetBerryBush() && smarterfarmers$isFarmer()) return true;
         return super.isInvulnerableTo(pSource);
     }
 

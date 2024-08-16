@@ -1,8 +1,7 @@
 package net.mehvahdjukaar.smarterfarmers.mixins;
 
 
-import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.smarterfarmers.CountOrderedSortedMap;
+import net.mehvahdjukaar.smarterfarmers.FrequencyOrderedCollection;
 import net.mehvahdjukaar.smarterfarmers.FarmTaskLogic;
 import net.mehvahdjukaar.smarterfarmers.SFPlatformStuff;
 import net.mehvahdjukaar.smarterfarmers.SmarterFarmers;
@@ -34,7 +33,7 @@ import java.util.*;
 
 @Mixin(value = {HarvestFarmland.class}, priority = 1200)
 public abstract class HarvestFarmlandMixin {
-
+/*
 
     @Shadow
     private BlockPos aboveFarmlandPos;
@@ -66,13 +65,14 @@ public abstract class HarvestFarmlandMixin {
      * @author MehVahdJukaar
      * @reason Smarter Farmers Mod, overhauled farm task logic
      */
+    /*
     @Overwrite
     protected boolean validPos(BlockPos pPos, ServerLevel level) {
         BlockState cropState = level.getBlockState(pPos);
         BlockState farmState = level.getBlockState(pPos.below());
         if(cropState.isAir() || FarmTaskLogic.isCropMature(cropState)){
             return FarmTaskLogic.isValidFarmland(farmState);
-        }else if(FarmTaskLogic.canSpecialBreak(cropState)){
+        }else if(FarmTaskLogic.canAlwaysHarvest(cropState)){
             return (FarmTaskLogic.isValidFarmland(farmState) || farmState.is(BlockTags.DIRT));
         }
         return false;
@@ -87,9 +87,12 @@ public abstract class HarvestFarmlandMixin {
      * @reason Smarter Farmers Mod, overhauled farm task logic
      */
     //@Overwrite
+    /*
     @Inject(method = "tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/npc/Villager;J)V",
             at = @At("HEAD"), cancellable = true)
     public void tick(ServerLevel level, Villager villager, long tickCount, CallbackInfo ci) {
+        FarmTaskLogic.test();
+
         if (this.aboveFarmlandPos == null || this.aboveFarmlandPos.closerToCenterThan(villager.position(), 1.0D)) {
             if (this.aboveFarmlandPos != null && tickCount > this.nextOkStartTime) {
                 BlockState toHarvest = level.getBlockState(this.aboveFarmlandPos);
@@ -99,7 +102,7 @@ public abstract class HarvestFarmlandMixin {
 
                 if(!toHarvest.isAir()) {
                     //break special crop
-                    if (FarmTaskLogic.canSpecialBreak(toHarvest)) {
+                    if (FarmTaskLogic.canAlwaysHarvest(toHarvest)) {
                         level.destroyBlock(this.aboveFarmlandPos, true, villager);
                         BlockState below = level.getBlockState(belowPos);
                         if (SFPlatformStuff.tillBlock(below, belowPos, level)) {
@@ -219,7 +222,7 @@ public abstract class HarvestFarmlandMixin {
         }
         ci.cancel();
     }
-
+*/
 
 }
 
