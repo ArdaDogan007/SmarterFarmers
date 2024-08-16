@@ -38,7 +38,6 @@ public class FarmTaskDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
     }
 
     private void renderInfo(PoseStack poseStack, MultiBufferSource multiBufferSource, SFHarvestFarmland task, Villager villager) {
-        boolean selected = true;
         int i = 0;
         renderTextOverMob(poseStack, multiBufferSource, villager.position(), i++,
                 "Activities: " + villager.getBrain().getActiveActivities(), 0xff9900, 0.03F);

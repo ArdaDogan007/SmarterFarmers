@@ -7,7 +7,6 @@
     "DebugRendererMixin"
   ],
   "mixins": [
-    "HarvestFarmlandMixin",
     "ReplaceTaskMixin",
     "SecondaryPoiSensorMixin",
     "UseBonemealMixin",
