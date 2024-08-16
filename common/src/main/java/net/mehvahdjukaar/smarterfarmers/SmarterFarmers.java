@@ -70,6 +70,7 @@ public class SmarterFarmers {
     }
 
     public static void setup() {
+        //TODO: add villager worksite modded blocks (farmland)
         //TODO: use quark recipe crawl to convert crop->seed or crop->food
         try {
             Map<Item, Integer> newMap = new HashMap<>(Villager.FOOD_POINTS);

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.smarterfarmers.forge;
 
+import net.mehvahdjukaar.hauntedharvest.blocks.CornBaseBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;

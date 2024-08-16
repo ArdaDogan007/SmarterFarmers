@@ -1,3 +1,5 @@
 accessWidener   v2  named
 
 mutable field net/minecraft/world/entity/npc/Villager FOOD_POINTS Ljava/util/Map;
+
+accessible field net/minecraft/world/entity/ai/behavior/Behavior endTimestamp J
