@@ -11,6 +11,7 @@
     "ReplaceTaskMixin",
     "SecondaryPoiSensorMixin",
     "UseBonemealMixin",
+    "VillagerAccessor",
     "VillagerMixin"
   ],
   "injectors": {

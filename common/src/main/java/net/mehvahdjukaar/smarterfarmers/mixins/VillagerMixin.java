@@ -6,6 +6,7 @@ import net.mehvahdjukaar.smarterfarmers.SmarterFarmers;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.behavior.VillagerGoalPackages;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerData;
@@ -14,9 +15,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -27,6 +26,7 @@ import java.util.Map;
 @Mixin(Villager.class)
 public abstract class VillagerMixin extends AbstractVillager {
 
+    @Final
     @Shadow
     public static Map<Item, Integer> FOOD_POINTS;
 
@@ -63,7 +63,7 @@ public abstract class VillagerMixin extends AbstractVillager {
     }
 
     @Inject(method = "handleEntityEvent", at = @At(value = "HEAD"))
-    public void handleEntityEvent(byte pId, CallbackInfo ci) {
+    public void smarterFarmers$addEatingParticles(byte pId, CallbackInfo ci) {
         if (pId == EntityEvent.FOX_EAT) { //using this one
             if (this.level().isClientSide) {
                 //copied from haunted harvest
