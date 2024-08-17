@@ -40,8 +40,13 @@ public class SFPlatformStuffImpl {
     }
 
     public static BlockState getPlant(ServerLevel world, BlockPos pos, ItemStack itemStack) {
-        return ((IPlantable) ((BlockItem) itemStack.getItem()).getBlock())
-                .getPlant(world, pos);
+        if(itemStack.getItem() instanceof BlockItem blockItem){
+            if(blockItem.getBlock() instanceof IPlantable ip){
+                return ip.getPlant(world, pos);
+            }
+            return blockItem.getBlock().defaultBlockState();
+        }
+        return null;
     }
 
 

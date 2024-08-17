@@ -25,6 +25,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -262,8 +263,11 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
         //check if toHarvestBlock is empty to replant
         if (targetState.isAir() && FarmTaskLogic.isValidFarmland(farmlandBlock.getBlock())) {
-            // first try to replant. 
-            ItemStack itemToPlant = findSameItem(villager.getInventory(), toReplace);
+            // first try to replant.
+            ItemStack itemToPlant = null;
+            if(toReplace != Items.AIR) {
+                 itemToPlant = findSameItem(villager.getInventory(), toReplace);
+            }
 
             // if we cant replant, or we are planting a new, recompute seed to plant anyways
             // seedToHold is just visual. Most time it should match whats actually planted
@@ -273,11 +277,17 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
             if (itemToPlant != null) {
 
-                level.setBlock(aboveFarmlandPos, SFPlatformStuff.getPlant(level, aboveFarmlandPos, itemToPlant), 3);
+                BlockState plant = SFPlatformStuff.getPlant(level, aboveFarmlandPos, itemToPlant);
+                if (plant != null) {
+                    level.setBlock(aboveFarmlandPos, plant, 3);
+                    level.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos,
+                            GameEvent.Context.of(villager, plant));
 
-                level.playSound(null, this.aboveFarmlandPos.getX(), this.aboveFarmlandPos.getY(), this.aboveFarmlandPos.getZ(), SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
-                itemToPlant.shrink(1);
-
+                    level.playSound(null, this.aboveFarmlandPos.getX(), this.aboveFarmlandPos.getY(), this.aboveFarmlandPos.getZ(), SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    itemToPlant.shrink(1);
+                } else {
+                    SmarterFarmers.LOGGER.error("Failed to plant seed at {} from item {} and block {}: ", aboveFarmlandPos, itemToPlant, toReplace);
+                }
             }
 
         }

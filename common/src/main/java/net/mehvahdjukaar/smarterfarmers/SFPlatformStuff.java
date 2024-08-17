@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 public class SFPlatformStuff {
 
@@ -22,6 +23,7 @@ public class SFPlatformStuff {
         throw new AssertionError();
     }
 
+    @Nullable
     @ExpectPlatform
     public static BlockState getPlant(ServerLevel world, BlockPos pos, ItemStack itemStack) {
         throw new AssertionError();

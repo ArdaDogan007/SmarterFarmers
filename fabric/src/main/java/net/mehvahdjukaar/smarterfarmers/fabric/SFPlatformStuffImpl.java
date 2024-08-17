@@ -36,8 +36,12 @@ public class SFPlatformStuffImpl {
         return null;
     }
 
+    @Nullable
     public static BlockState getPlant(ServerLevel world, BlockPos pos, ItemStack itemStack) {
-        return ((BlockItem) itemStack.getItem()).getBlock().defaultBlockState();
+        if(itemStack.getItem() instanceof BlockItem blockItem){
+            return blockItem.getBlock().defaultBlockState();
+        }
+        return null;
     }
 
     public static boolean isValidSeed(Item i) {
