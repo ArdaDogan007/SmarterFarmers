@@ -22,7 +22,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -272,8 +271,10 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
     private void replant(ServerLevel level, Villager villager, Item toReplace) {
         // first try to replant.
-        ItemStack itemToPlant = findSameItem(villager.getInventory(), toReplace);
-
+        ItemStack itemToPlant = null;
+        if (toReplace != Items.AIR) {
+            itemToPlant = findSameItem(villager.getInventory(), toReplace);
+        }
         // if we cant replant, or we are planting a new, recompute seed to plant anyways
         // seedToHold is just visual. Most time it should match whats actually planted
         if (itemToPlant == null) {
@@ -297,10 +298,11 @@ public class SFHarvestFarmland extends HarvestFarmland {
 
                 level.playSound(null, this.aboveFarmlandPos.getX(), this.aboveFarmlandPos.getY(), this.aboveFarmlandPos.getZ(), SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
                 itemToPlant.shrink(1);
+            } else {
+                SmarterFarmers.LOGGER.error("Failed to replant {} from item {}", toReplace, itemToPlant);
             }
-            else{
-                int aa = 1;
-            }
+        } else {
+            SmarterFarmers.LOGGER.error("Failed to replant {}", toReplace);
         }
     }
 
