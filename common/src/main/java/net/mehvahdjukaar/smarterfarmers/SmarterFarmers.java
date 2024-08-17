@@ -16,6 +16,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ai.behavior.VillagerGoalPackages;
+import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
@@ -83,6 +85,7 @@ public class SmarterFarmers {
 
     public static void setup() {
         //TODO: use quark recipe crawl to convert crop->seed or crop->food
+        //make them craft stuff in work at composter
         try {
             Map<Item, Integer> newMap = new HashMap<>(Villager.FOOD_POINTS);
 

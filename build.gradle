@@ -38,7 +38,7 @@ subprojects {
 
     if (env.MODRINTH_TOKEN) {
         modrinth {
-            projectId = "smarterfarmers"
+            projectId = "smarter-farmers-farmers-replant"
             uploadFile = tasks.remapJar
             gameVersions = [rootProject.minecraft_version]
             loaders = [modLoader]

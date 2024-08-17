@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.smarterfarmers.neoforge;
 
+import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.smarterfarmers.SmarterFarmers;
 import net.minecraft.world.entity.npc.Villager;
 import net.neoforged.bus.api.IEventBus;
@@ -15,6 +16,7 @@ import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 public class SmarterFarmersForge {
 
     public SmarterFarmersForge(IEventBus bus) {
+        RegHelper.startRegisteringFor(bus);
         SmarterFarmers.commonInit();
         NeoForge.EVENT_BUS.register(this);
     }
