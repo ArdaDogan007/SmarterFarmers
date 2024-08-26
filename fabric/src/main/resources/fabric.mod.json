@@ -17,6 +17,9 @@
   "entrypoints": {
     "main": [
       "net.mehvahdjukaar.smarterfarmers.fabric.SmarterFarmersFabric"
+    ],
+    "modmenu": [
+      "net.mehvahdjukaar.smarterfarmers.fabric.ModMenuCompat"
     ]
   },
   "mixins": [

@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.smarterfarmers.mixins.VillagerAccessor;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -16,8 +17,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.ai.behavior.VillagerGoalPackages;
-import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
@@ -59,6 +58,8 @@ public class SmarterFarmers {
     public static final Supplier<Boolean> DEBUG_RENDERERS;
     public static final Supplier<Integer> TIME_TO_HARVEST;
 
+    public static final ModConfigHolder CONFIG;
+
     static {
         ConfigBuilder builder = ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
 
@@ -75,7 +76,7 @@ public class SmarterFarmers {
 
         builder.pop();
 
-        builder.build();
+        CONFIG = builder.build();
     }
 
     public static void commonInit() {
