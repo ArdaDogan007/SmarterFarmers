@@ -2,6 +2,7 @@ package net.mehvahdjukaar.smarterfarmers.neoforge;
 
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.smarterfarmers.SmarterFarmers;
+import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
 import net.minecraft.world.entity.npc.Villager;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
