@@ -22,6 +22,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
@@ -186,6 +188,9 @@ public class SFHarvestFarmland extends HarvestFarmland {
     @Nullable
     protected Action getActionForPos(BlockPos pos, ServerLevel level) {
         BlockState cropState = level.getBlockState(pos);
+        if (cropState.is(Blocks.PUMPKIN)) {
+            int aa =1;
+        }
         BlockState farmState = level.getBlockState(pos.below());
         boolean validFarmland = FarmTaskLogic.isValidFarmland(farmState.getBlock());
         if (validFarmland) {

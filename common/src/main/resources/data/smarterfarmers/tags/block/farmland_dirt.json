@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "minecraft:dit",
+    "minecraft:dirt",
     {"id":"farmers_delight:rich_soil","required":false}
   ]
 }
