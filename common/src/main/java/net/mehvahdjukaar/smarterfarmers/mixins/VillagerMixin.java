@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.smarterfarmers.mixins;
 
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.smarterfarmers.SFPlatformStuff;
 import net.mehvahdjukaar.smarterfarmers.SmarterFarmers;
 import net.minecraft.world.damagesource.DamageSource;
@@ -39,19 +41,17 @@ public abstract class VillagerMixin extends AbstractVillager {
         super(entityType, level);
     }
 
-    @Inject(method = {"wantsToPickUp"}, at = {@At("HEAD")}, cancellable = true)
-    private void wantsToPickUp(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+    @ModifyReturnValue(method = "wantsToPickUp", at = {@At("RETURN")})
+    private boolean wantsToPickUp(boolean original, @Local(argsOnly = true) ItemStack stack) {
         Item i = stack.getItem();
         if (FOOD_POINTS.containsKey(i)) {
-            cir.setReturnValue(true);
-            cir.cancel();
+           return true;
         }
         //prevent non farmers from stealing seeds
         else if (SFPlatformStuff.isValidSeed(stack, (Villager) (Object) this)) {
-            boolean grab = smarterfarmers$isFarmer() && this.getInventory().canAddItem(stack);
-            cir.setReturnValue(grab);
-            cir.cancel();
+            return smarterfarmers$isFarmer() && this.getInventory().canAddItem(stack);
         }
+        return original;
     }
 
     @Unique

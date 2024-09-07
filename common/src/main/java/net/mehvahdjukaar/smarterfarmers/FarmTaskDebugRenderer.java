@@ -18,7 +18,7 @@ public class FarmTaskDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
 
     private final WeakHashMap<Villager, SFHarvestFarmland> villagerFarmTasks = new WeakHashMap<>();
 
-
+    @Override
     public void clear() {
         this.villagerFarmTasks.clear();
     }
