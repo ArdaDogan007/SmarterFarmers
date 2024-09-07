@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
@@ -197,9 +196,12 @@ public class SFHarvestFarmland extends HarvestFarmland {
                 return Action.PLANT;
             }
         }
-        if (FarmTaskLogic.canAlwaysHarvest(cropState) &&
-                (validFarmland || farmState.is(BlockTags.DIRT))) {
+        if (cropState.is(SmarterFarmers.HARVESTABLE_ON_DIRT_NO_REPLANT) &&
+                farmState.is(SmarterFarmers.FARMLAND_DIRT)) {
             return Action.HARVEST;
+        } else if (cropState.is(SmarterFarmers.HARVESTABLE_ON_DIRT) &&
+                farmState.is(SmarterFarmers.FARMLAND_DIRT)) {
+            return Action.HARVEST_AND_REPLANT;
         }
         return null;
     }
@@ -229,13 +231,15 @@ public class SFHarvestFarmland extends HarvestFarmland {
         // harvest
         if (!targetState.isAir()) {
             //break special crop
-            if (FarmTaskLogic.canAlwaysHarvest(targetState)) {
+            if (targetState.is(SmarterFarmers.SPECIAL_HARVESTABLE) ||
+                    targetState.is(SmarterFarmers.HARVESTABLE_ON_DIRT) ||
+                    targetState.is(SmarterFarmers.HARVESTABLE_ON_DIRT_NO_REPLANT)) {
                 level.destroyBlock(this.aboveFarmlandPos, true, villager);
                 BlockState below = level.getBlockState(belowPos);
                 if (SFPlatformStuff.tillBlock(below, belowPos, level)) {
                     level.playSound(null, belowPos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
                 }
-                if (FarmTaskLogic.canBreakNoReplant(targetState)) {
+                if (targetState.is(SmarterFarmers.HARVESTABLE_ON_DIRT_NO_REPLANT)) {
                     this.aboveFarmlandPos = null;
                     //dont replant pumpkins. exit early
                     return;

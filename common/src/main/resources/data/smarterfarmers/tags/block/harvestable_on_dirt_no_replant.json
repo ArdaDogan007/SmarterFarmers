@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:pumpkin",
+    "minecraft:melon",
+    {"id":"immersive_weathering:weeds","required":false}
+  ]
+}

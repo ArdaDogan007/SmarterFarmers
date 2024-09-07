@@ -34,11 +34,10 @@ public class FarmTaskLogic {
         if (b instanceof IBeeGrowable bg) {
             return bg.isPlantFullyGrown(state, pos, level);
         }
+        if (state.is(SmarterFarmers.SPECIAL_HARVESTABLE)) return true;
+
         if (b instanceof CropBlock crop) {
             return crop.isMaxAge(state);
-        }
-        if (b instanceof CropBlock crop) {
-            crop.isMaxAge(state);
         }
         return b instanceof SweetBerryBushBlock && state.getValue(SweetBerryBushBlock.AGE) == 2 ||
                 hardcodedCheckMaxAge(state, b); //if previous didnt catch it (some mods dont extend crop block)
@@ -57,15 +56,6 @@ public class FarmTaskLogic {
 
     private static boolean checkAge(BlockState state, IntegerProperty property, int max) {
         return state.hasProperty(property) && state.getValue(property) == max;
-    }
-
-    // plants that can be harvested on any soil
-    public static boolean canAlwaysHarvest(BlockState state) {
-        return state.is(SmarterFarmers.SPECIAL_HARVESTABLE) || canBreakNoReplant(state);
-    }
-
-    public static boolean canBreakNoReplant(BlockState state) {
-        return state.is(SmarterFarmers.NO_REPLANT);
     }
 
     public static boolean isValidFarmland(Block block) {

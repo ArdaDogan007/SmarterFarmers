@@ -49,8 +49,10 @@ public class SmarterFarmers {
     public static final boolean QUARK = PlatHelper.isModLoaded("quark");
 
     public static final TagKey<Block> SPECIAL_HARVESTABLE = TagKey.create(Registries.BLOCK, res("harvestable_plant"));
-    public static final TagKey<Block> NO_REPLANT = TagKey.create(Registries.BLOCK, res("harvestable_plant_no_replant"));
+    public static final TagKey<Block> HARVESTABLE_ON_DIRT_NO_REPLANT = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "harvestable_on_dirt_no_replant"));
+    public static final TagKey<Block> HARVESTABLE_ON_DIRT = TagKey.create(Registries.BLOCK, res("harvestable_on_dirt"));
     public static final TagKey<Block> VALID_FARMLAND = TagKey.create(Registries.BLOCK, res("farmer_plantable_on"));
+    public static final TagKey<Block> FARMLAND_DIRT = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "farmland_dirt"));
     public static final TagKey<Item> EAT_BLACKLIST = TagKey.create(Registries.ITEM, res("villagers_cant_eat"));
 
     public static final Supplier<Boolean> PICKUP_FOOD;
