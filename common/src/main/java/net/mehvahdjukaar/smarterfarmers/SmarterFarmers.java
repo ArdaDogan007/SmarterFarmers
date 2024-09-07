@@ -3,7 +3,6 @@ package net.mehvahdjukaar.smarterfarmers;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
-import net.mehvahdjukaar.moonlight.api.events.forge.VillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -44,8 +43,10 @@ public class SmarterFarmers {
     public static final boolean QUARK = PlatHelper.isModLoaded("quark");
 
     public static final TagKey<Block> SPECIAL_HARVESTABLE = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "harvestable_plant"));
-    public static final TagKey<Block> NO_REPLANT = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "harvestable_plant_no_replant"));
+    public static final TagKey<Block> HARVESTABLE_ON_DIRT_NO_REPLANT = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "harvestable_on_dirt_no_replant"));
+    public static final TagKey<Block> HARVESTABLE_ON_DIRT = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "harvestable_on_dirt"));
     public static final TagKey<Block> VALID_FARMLAND = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "farmer_plantable_on"));
+    public static final TagKey<Block> FARMLAND_DIRT = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "farmland_dirt"));
     public static final TagKey<Item> MEAT = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "food/meat"));
 
     public static final Supplier<Boolean> PICKUP_FOOD;
@@ -53,7 +54,7 @@ public class SmarterFarmers {
     public static final Supplier<Boolean> DEBUG_RENDERERS;
     public static final Supplier<Integer> TIME_TO_HARVEST;
 
-    static{
+    static {
         ConfigBuilder builder = ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
 
         builder.push("general");
@@ -63,9 +64,9 @@ public class SmarterFarmers {
                 .define("eat_food", true);
         TIME_TO_HARVEST = builder.comment("Time for a farmer to harvest a crop once it reached its destination")
                 .define("time_to_harvest", 40, 1, 1000);
-        DEBUG_RENDERERS = PlatHelper.isDev() ? ()->true :
+        DEBUG_RENDERERS = PlatHelper.isDev() ? () -> true :
                 builder.comment("If true, will render debug info for farmers. Only works in single player")
-                .define("debug_renderer", false);
+                        .define("debug_renderer", false);
 
         builder.pop();
 
