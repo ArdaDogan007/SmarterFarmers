@@ -6,9 +6,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.common.ItemAbilities;
@@ -20,7 +22,7 @@ public class SFPlatformStuffImpl {
         if (item.getItem() instanceof SpecialPlantable pl) {
             return pl.villagerCanPlantItem(villager);
         }
-        return item.is(ItemTags.VILLAGER_PLANTABLE_SEEDS);
+        return item.is(ItemTags.VILLAGER_PLANTABLE_SEEDS) || (item.getItem() instanceof BlockItem bi && bi.getBlock() instanceof CropBlock);
     }
 
     public static boolean trySpecialPlant(ServerLevel level, BlockPos aboveFarmlandPos, ItemStack itemToPlant, Villager villager) {

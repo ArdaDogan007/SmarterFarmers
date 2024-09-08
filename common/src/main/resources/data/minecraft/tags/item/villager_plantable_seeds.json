@@ -1,0 +1,6 @@
+{
+  "values": [
+    {"id":"farmersdelight:cabbage_seeds","required":false},
+    {"id":"farmersdelight:tomato_seeds","required":false}
+  ]
+}
