@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.smarterfarmers.mixins.VillagerAccessor;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -83,20 +84,29 @@ public class SmarterFarmers {
 
     public static void commonInit() {
         MoonlightEventsHelper.addListener(SmarterFarmers::onVillagerBrainInitialize, IVillagerBrainEvent.class);
-        PlatHelper.addCommonSetup(SmarterFarmers::setup);
     }
 
-    public static void setup() {
+    private static final Map<Item, Integer> OLD_FOOD_POINTS = new HashMap<>();
+
+    public static void setupWithTags(RegistryAccess registryAccess, boolean client) {
+        if (OLD_FOOD_POINTS.isEmpty()) {
+            OLD_FOOD_POINTS.putAll(Villager.FOOD_POINTS);
+        }
+
         //TODO: use quark recipe crawl to convert crop->seed or crop->food
         //make them craft stuff in work at composter
         try {
-            Map<Item, Integer> newMap = new HashMap<>(Villager.FOOD_POINTS);
+            Map<Item, Integer> newMap = new HashMap<>(OLD_FOOD_POINTS);
 
             for (Item i : BuiltInRegistries.ITEM) {
                 FoodProperties foodProperties = i.components().get(DataComponents.FOOD);
-                if (foodProperties != null && i.components().getOrDefault(DataComponents.RARITY, Rarity.COMMON) != Rarity.COMMON
+                if (foodProperties != null &&
+                        i.components().getOrDefault(DataComponents.RARITY, Rarity.COMMON) == Rarity.COMMON
                         // villagers are vegetarian!
                         && !i.builtInRegistryHolder().is(EAT_BLACKLIST)
+                        && foodProperties.effects().stream().allMatch(e ->
+                            e.effect().getEffect().value().isBeneficial()
+                        )
                         // ignore container items
                         && !i.hasCraftingRemainingItem()
                         && i.getDefaultMaxStackSize() > 1) {
@@ -134,4 +144,6 @@ public class SmarterFarmers {
                 0.03, 0.05, 0.03);
 
     }
+
+
 }

@@ -18,6 +18,7 @@ public class SmarterFarmersFabric implements ModInitializer {
     public void onInitialize() {
         SmarterFarmers.commonInit();
         CommonLifecycleEvents.TAGS_LOADED.register((resourceManager, tagManager) -> {
+            SmarterFarmers.setupWithTags(resourceManager, false);
             if (!hasInitialized) {
                 hasInitialized = true;
 

@@ -8,6 +8,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 
 /**
@@ -20,6 +21,12 @@ public class SmarterFarmersForge {
         RegHelper.startRegisteringFor(bus);
         SmarterFarmers.commonInit();
         NeoForge.EVENT_BUS.register(this);
+    }
+
+    @SubscribeEvent
+    public void onTagLoad(TagsUpdatedEvent event){
+        SmarterFarmers.setupWithTags(event.getRegistryAccess(),
+                event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.CLIENT_PACKET_RECEIVED);
     }
 
     @SubscribeEvent

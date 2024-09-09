@@ -188,9 +188,6 @@ public class SFHarvestFarmland extends HarvestFarmland {
     @Nullable
     protected Action getActionForPos(BlockPos pos, ServerLevel level) {
         BlockState cropState = level.getBlockState(pos);
-        if (cropState.is(Blocks.PUMPKIN)) {
-            int aa =1;
-        }
         BlockState farmState = level.getBlockState(pos.below());
         boolean validFarmland = FarmTaskLogic.isValidFarmland(farmState.getBlock());
         if (validFarmland) {
